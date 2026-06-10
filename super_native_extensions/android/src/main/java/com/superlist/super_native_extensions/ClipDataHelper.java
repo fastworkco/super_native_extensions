@@ -89,25 +89,35 @@ public final class ClipDataHelper {
             res.add(typeTextPlain);
         }
         if (item.getUri() != null) {
-            String[] types = context.getContentResolver().getStreamTypes(item.getUri(), "*/*");
-            if (types != null) {
-                for (String type : types) {
-                    if (!res.contains(type)) {
+            try {
+                String[] types = context.getContentResolver().getStreamTypes(item.getUri(), "*/*");
+                if (types != null) {
+                    for (String type : types) {
+                        if (!res.contains(type)) {
+                            res.add(type);
+                        }
+                    }
+                } else {
+                    String type = context.getContentResolver().getType(item.getUri());
+                    if (type != null) {
                         res.add(type);
+                    } else {
+                        res.add(typeUriList);
                     }
                 }
-            } else {
-                String type = context.getContentResolver().getType(item.getUri());
-                if (type != null) {
-                    res.add(type);
-                } else {
+            } catch (Exception e) {
+                // Resolving the URI calls into the remote content provider over
+                // binder. If that provider's process throws, the exception is
+                // re-thrown here and would crash the app. Fall back to treating
+                // the item as a plain URI instead.
+                Log.w(TAG, "Failed to resolve stream types for " + item.getUri(), e);
+                if (!res.contains(typeUriList)) {
                     res.add(typeUriList);
                 }
             }
         }
         return res.toArray(new String[0]);
     }
-
     CharSequence getText(ClipData.Item item, Context context) {
         return coerceToPlainText(item, context);
     }
