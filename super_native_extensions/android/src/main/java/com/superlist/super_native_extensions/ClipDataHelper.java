@@ -36,6 +36,8 @@ public final class ClipDataHelper {
     static final String typeTextHtml = "text/html";
     static final String typeUriList = "text/uri-list";
 
+    private static final String TAG = "SuperClipboard" + ClipDataHelper.class.getSimpleName();
+
     public String[] getFormats(ClipData data, int index, Context context) {
         if (index < data.getItemCount()) {
             return getFormats(data.getItemAt(index), context);
